@@ -88,10 +88,10 @@ int main() {
             adj[token].push_back(child);
             vis[token]=false;
             vis[child]=false;
-            if(progress.find(p.first)==progress.end())progress[p.first]=0;
-            if(progress.find(p.second)==progress.end())progress[p.second]=0;
-            inorder[p.second]++;
-            if(inorder.find(p.first)==inorder.end())inorder[p.first]=0;
+            if(progress.find(token)==progress.end())progress[token]=0;
+            if(progress.find(child)==progress.end())progress[child]=0;
+            inorder[child]++;
+            if(inorder.find(token)==inorder.end())inorder[token]=0;
         }
 
     }
