@@ -66,33 +66,38 @@ bool compare(pair<string,int> a, pair<string, int> b) {
 
 int main() {
 
-    int m;
-    cin>>m;
-    vector<string> input;
-    vector<string> nodes;
-    for(int i=0;i<m;i++) {
-        string s;
-        cin>>s;
-        input.push_back(s);
-    }
-    
-    for(int i=0;i<m;i++) {
-        pair<string, string> p = containsNumber(input[i]);
-        if(p.second=="") {
-            p=findRelation(input[i]);
-            adj[p.first].push_back(p.second);
+    ifstream inputFile("input.txt");
+    string line;
+
+    while(getline(inputFile, line)) {
+        stringstream ss(line);
+
+        string token;
+        ss >> token;
+
+        if(ss.peek()=='=') {
+            double skillProgress;
+            ss.ignore();
+            ss >> skillProgress;
+            progress[token]=skillProgress;
+        } else {
+            ss.ignore;
+            string child;
+            ss >>child;
+
+            adj[token].push_back(child);
+            vis[token]=false;
+            vis[child]=false;
             if(progress.find(p.first)==progress.end())progress[p.first]=0;
             if(progress.find(p.second)==progress.end())progress[p.second]=0;
-            nodes.push_back(p.first);
-            nodes.push_back(p.second);
-            vis[p.first]=false;
-            vis[p.second]=false;
             inorder[p.second]++;
             if(inorder.find(p.first)==inorder.end())inorder[p.first]=0;
-        } else {
-            progress[p.first]=stod(p.second);
         }
+
     }
+
+    inputFile.close();
+
     for(auto mp: inorder) {
         inorderPair.push_back({mp.second, mp.first});
     }
