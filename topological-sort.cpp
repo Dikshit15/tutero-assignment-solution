@@ -1,107 +1,115 @@
-@include<bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
 
-struct Skill {
-	string name;
-	double progress;
-}
+vector<pair<string,int>> ans;
+map<string, bool> vis;
+map<string, vector<string>> adj;
+map<string, double> progress;
+map<string, int> inorder;
+vector<pair<int, string>> inorderPair;
 
-class Graph {
-private:
-	unordered_map<Skill, vector<Skill>> adjacencyList;
-	unordered_map<Skill, int> inDegree;
 
-public:
-	void addEdge(const Skill& from, const Skill& to) {
-		adjacencyList[from].push_back(to);
-		inDegree[to]++;
-	}
-
-	const vector<Skill>& getChildren(const Skill& node) const {
-		return adjacencyList.at(node);
-	}
-
-	int getInDegree(const Skill& node) const {
-		return inDegree.at(node);
-	}
-}
-
-void TopologicalSort(const Graph& graph, const Skill& node, map<Skill, bool>& visited, vector<Skill>& orderedSkills) {
-    visited[node] = true;
-
-    for (const Skill& child : graph.getChildren(node)) {
-        if (!visited[child]) {
-            TopologicalSort(graph, child, visited, orderedSkills);
+void dfs(string node, int level) {
+    vis[node]=true;
+    for(int i=0;i<adj[node].size();i++) {
+        if(vis.find(adj[node][i])==vis.end()) {
+            dfs(adj[node][i], level+1);
         }
     }
-
-    orderedSkills.push_back(node);
+    ans.push_back({node, level});
 }
 
-vector<Skill> LearningRoadmap(const Graph& graph, const map<string, double>& skills) {
-    // Create an empty list called orderedSkills
-    vector<Skill> orderedSkills;
-
-    // Create a map called visitedSkills to keep track of the skills we have already visited
-    map<Skill, bool> visitedSkills;
-
-    // For each skill s in the knowledge graph
-    for (const auto& [skill, _] : graph.getChildren()) {
-        // If s has not been visited yet, run the topological sort algorithm with s as the starting node
-        if (!visitedSkills[skill]) {
-            TopologicalSort(graph, skill, visitedSkills, orderedSkills);
+pair<string,string> containsNumber(string s) {
+    int n=s.length();
+    string temp="";
+    string name="";
+    int i=0;
+    while(i<n) {
+        if(s[i]=='='){
+            i++;continue;
         }
-    }
-
-    // Check for any interchangeable skills and reorder them based on their progress
-    for (size_t i = 0; i < orderedSkills.size() - 1; i++) {
-        if (orderedSkills[i].progress == orderedSkills[i + 1].progress) {
-            if (skills.at(orderedSkills[i].name) < skills.at(orderedSkills[i + 1].name)) {
-                swap(orderedSkills[i], orderedSkills[i + 1]);
-                i = -1; // Restart the loop to check again for any further swaps
-            }
+        if((s[i]>='0' && s[i]<='9') || s[i]=='.') {
+            temp+=s[i];
+        } else {
+            name+=s[i];
         }
+        i++;
     }
-
-    return orderedSkills;
+    return {name,temp};
 }
 
+pair<string, string> findRelation(string s) {
+    pair<string, string> p;
+    int flag=0;
+    string first="", second="";
+    
+    int i=0;
+    while(i<s.length()) {
+        if(s[i]=='-') flag=1;
+        if(s[i]=='-' || s[i]=='>') {
+            i++;continue;
+        } else {
+            if(flag==0)first+=s[i];
+            else second+=s[i];
+            i++;
+        }
+    }
+    return {first, second};
+}
+
+bool compare(pair<string,int> a, pair<string, int> b) {
+    if(a.second==b.second) {
+        return progress[a.first]>progress[b.first];
+    }
+    return a.second<b.second;
+}
 
 int main() {
 
-	ifstream inputFile("input.txt");
+    int m;
+    cin>>m;
+    vector<string> input;
+    vector<string> nodes;
+    for(int i=0;i<m;i++) {
+        string s;
+        cin>>s;
+        input.push_back(s);
+    }
+    
+    for(int i=0;i<m;i++) {
+        pair<string, string> p = containsNumber(input[i]);
+        if(p.second=="") {
+            p=findRelation(input[i]);
+            adj[p.first].push_back(p.second);
+            if(progress.find(p.first)==progress.end())progress[p.first]=0;
+            if(progress.find(p.second)==progress.end())progress[p.second]=0;
+            nodes.push_back(p.first);
+            nodes.push_back(p.second);
+            vis[p.first]=false;
+            vis[p.second]=false;
+            inorder[p.second]++;
+            if(inorder.find(p.first)==inorder.end())inorder[p.first]=0;
+        } else {
+            progress[p.first]=stod(p.second);
+        }
+    }
+    for(auto mp: inorder) {
+        inorderPair.push_back({mp.second, mp.first});
+    }
+    sort(inorderPair.begin(), inorderPair.end());
 
-	Graph graph;
-	Map<string, double> progress;
+    for(int i=0;i<inorderPair.size();i++) {
+        if(!vis[inorderPair[i].second]) {
+            dfs(inorderPair[i].second, 0);
+        }
+    }
 
-	string line;
-	while(getline(inputFile, line)) {
-		stringstream ss(line);
+    sort(ans.begin(),ans.end(), compare);
 
-		string token;
-		ss >> token;
+    for(int i=0;i<ans.size();i++) {
+        cout<<ans[i].first<<endl;
+    }
 
-		if(ss.peek()=='=') {
-			double skillProgress;
-			ss.ignore();
-			ss >> skillProgress;
-			progress[token]=skillProgress;
-		} else {
-			ss.ignore;
-			string child;
-			ss >>child;
 
-			graph.addEdge({token,0}, {child, 0});
-		}
-
-	}
-
-	inputFile.close();
-
-	vector<Skill> answer = LearningRoadmap(graph, progress);
-
-	for(int i=0;i>answer.size();i++) {
-		cout<<answer[i]<<endl;
-	}
-	return 0;
+    return 0;
 }
