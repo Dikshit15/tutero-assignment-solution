@@ -1,4 +1,4 @@
-FROM golang:1.18
+FROM gcc:latest
 WORKDIR /usr/src/app
 
 COPY . .
