@@ -1,3 +1,13 @@
+Instructions on how to run the assignment : 
+
+1. Run `docker build -t assignment .`
+2. Run `docker run -v /your file path/input.txt:/usr/src/app/input.txt assignment`
+For eg: On going to my folder where the assignment was : 
+I did `pwd` to get file path of input.txt file.
+So for me, the command looked like : `docker run -v /Users/dikshit/Desktop/tutero-assignment-solution/input.txt:/usr/src/app/input.txt assignment`
+This printed the solution on standard output.
+
+
 # Tutero Assignment
 
 **Please create a template from this repository!**
