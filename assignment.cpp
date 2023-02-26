@@ -1,5 +1,8 @@
 #include<bits/stdc++.h>
+#include<fstream>
+#include<iostream>
 using namespace std;
+namespace fs = std::filesystem;
 
 vector<pair<string,int>> ans;
 map<string, bool> vis;
@@ -66,25 +69,34 @@ bool compare(pair<string,int> a, pair<string, int> b) {
 
 int main() {
 
-    ifstream inputFile("input.txt");
+
+    ifstream inputFile("/usr/src/app/input.txt");
     string line;
 
+    if (!inputFile.is_open()) {
+        cout << "Error opening file" << endl;
+        return 1;
+    }
+
+    if(!inputFile) {
+        cout<<"Error opening input file"<<endl;
+        return 1;
+    }
+
     while(getline(inputFile, line)) {
+        if (inputFile.fail()) {
+            cout<< "Error reading from file"<< endl;
+            return 1;
+        }
         stringstream ss(line);
 
-        string token;
-        ss >> token;
+        string token,child;
 
-        if(ss.peek()=='=') {
-            double skillProgress;
-            ss.ignore();
-            ss >> skillProgress;
-            progress[token]=skillProgress;
-        } else {
-            ss.ignore();
-            string child;
-            ss >>child;
-
+        pair<string, string> p = containsNumber(line);
+        if(p.second=="") {
+            pair<string, string> p1 = findRelation(line);
+            token = p1.first;
+            child = p1.second;
             adj[token].push_back(child);
             vis[token]=false;
             vis[child]=false;
@@ -92,8 +104,10 @@ int main() {
             if(progress.find(child)==progress.end())progress[child]=0;
             inorder[child]++;
             if(inorder.find(token)==inorder.end())inorder[token]=0;
+        } else {
+            token = p.first;
+            progress[token]=stod(p.second);
         }
-
     }
 
     inputFile.close();
@@ -108,7 +122,6 @@ int main() {
             dfs(inorderPair[i].second, 0);
         }
     }
-
     sort(ans.begin(),ans.end(), compare);
 
     for(int i=0;i<ans.size();i++) {
