@@ -81,7 +81,7 @@ int main() {
             ss >> skillProgress;
             progress[token]=skillProgress;
         } else {
-            ss.ignore;
+            ss.ignore();
             string child;
             ss >>child;
 
